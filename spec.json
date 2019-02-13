@@ -1,11 +1,11 @@
 {
-  "nio/Example": {
+  "nio/UUID4": {
     "description": "A short summary of the block.",
     "categories": [
-      ""
+      "Signal Modifier"
     ],
-    "tags": "",
-    "from_readme": "docs/example_block.md",
-    "from_python": "example_block.Example"
+    "tags": "uuid guid unique random",
+    "from_readme": "docs/uuid4_block.md",
+    "from_python": "uuid4.UUID4"
   }
 }

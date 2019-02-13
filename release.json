@@ -1,7 +1,7 @@
 {
-  "nio/Example": {
+  "nio/UUID4": {
     "language": "Python",
-    "from_python": "example_bock.Example",
-    "url": "git://github.com/<organization>/<repo>[@<tag>]"
+    "from_python": "uuid4_bock.UUID4",
+    "url": "git://github.com/tyoungNIO/uuid.git"
   }
 }
