@@ -44,3 +44,24 @@ class TestUUID4(NIOBlockTestCase):
             'pi': 3.14,
             'uuid': 'foobarbaz',
         }))
+
+    @patch('uuid.uuid4')
+    def test_binary_output(self, mock_uuid4):
+        """Optinal binary output instead of canonical hex string."""
+        mock_uuid_obj = Mock()
+        mock_uuid_obj.bytes = b'foo'
+        mock_uuid_obj.__str__ = Mock(side_effect=str)  # must return string
+        mock_uuid4.return_value = mock_uuid_obj
+        blk = UUID4()
+        config = {
+            'binary': True,
+        }
+        self.configure_block(blk, config)
+        blk.start()
+        blk.process_signals([Signal()])
+        blk.stop()
+        self.assert_last_signal_notified(Signal({
+            'uuid': b'foo',
+        }))
+        mock_uuid4.assert_called_once_with()
+        mock_uuid_obj.__str__.assert_not_called()
