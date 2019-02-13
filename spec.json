@@ -7,5 +7,14 @@
     "tags": "uuid guid unique random",
     "from_readme": "docs/uuid4_block.md",
     "from_python": "uuid4.UUID4"
+  },
+  "nio/UUID5": {
+    "description": "A short summary of the block.",
+    "categories": [
+      "Signal Modifier"
+    ],
+    "tags": "uuid guid unique random",
+    "from_readme": "docs/uuid5_block.md",
+    "from_python": "uuid5.UUID5"
   }
 }
