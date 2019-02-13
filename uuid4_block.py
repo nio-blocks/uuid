@@ -21,7 +21,6 @@ class UUID4(EnrichSignals, Block):
         if not self.binary():
             new_uuid = str(new_uuid)
         else:
-            print(new_uuid.bytes)
             new_uuid = new_uuid.bytes
         new_signal = {self.output(signal): new_uuid}
         return self.get_output_signal(new_signal, signal)
