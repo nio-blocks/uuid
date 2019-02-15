@@ -1,12 +1,7 @@
 {
-  "nio/UUID4": {
+  "nio/UUID": {
     "language": "Python",
-    "from_python": "uuid4_bock.UUID4",
-    "url": "git://github.com/tyoungNIO/uuid.git"
-  },
-  "nio/UUID5": {
-    "language": "Python",
-    "from_python": "uuid5_bock.UUID5",
+    "from_python": "uuid_bock.UUID",
     "url": "git://github.com/tyoungNIO/uuid.git"
   }
 }
