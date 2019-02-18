@@ -42,6 +42,9 @@ class TestUUID(NIOBlockTestCase):
         mock_uuid5.return_value = mock_uuid_obj
         blk = UUID()
         config = {
+            'uuid_name': {
+                'name_string': 'niolabs.com',
+            },
             'name_string': 'niolabs.com',
             'uuid_version': '{{ $uuid_version }}'
         }
@@ -72,8 +75,10 @@ class TestUUID(NIOBlockTestCase):
         mock_uuid5.return_value = mock_uuid_obj
         blk = UUID()
         config = {
-            'name_string': 'niolabs.com',
-            'name_space': '{{ $namespace }}',
+            'uuid_name': {
+                'name_string': 'niolabs.com',
+                'name_space': '{{ $namespace }}',
+            },
             'uuid_version': 5,
         }
         self.configure_block(blk, config)

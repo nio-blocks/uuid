@@ -2,8 +2,8 @@ from enum import Enum
 import uuid
 from nio import Block
 from nio.block.mixins import EnrichSignals 
-from nio.properties import BoolProperty, SelectProperty, StringProperty, \
-    VersionProperty
+from nio.properties import BoolProperty, ObjectProperty, PropertyHolder, \
+    SelectProperty, StringProperty, VersionProperty
 
 
 class UUIDnamespace(Enum):
@@ -15,34 +15,43 @@ class UUIDnamespace(Enum):
 
 class UUIDversions(Enum):
 
-    one = 1
-    three = 3
-    four = 4
-    five = 5
+    v1 = 1
+    v3 = 3
+    v4 = 4
+    v5 = 5
+
+class UUIDname(PropertyHolder):
+
+    name_string = StringProperty(
+        title='Name',
+        allow_none=True,
+        order=0)
+    name_space = SelectProperty(
+        UUIDnamespace,
+        title='Namespace',
+        default=UUIDnamespace.DNS,
+        order=1)
 
 class UUID(EnrichSignals, Block):
 
-    name_string = StringProperty(
-        title='Name (versions 3 and 5 only)',
-        allow_none=True,
-        order=1)
-    name_space = SelectProperty(
-        UUIDnamespace,
-        title='Namespace (versions 3 and 5 only)',
-        default=UUIDnamespace.DNS,
-        order=2)
-    uuid_version = SelectProperty(
-        UUIDversions,
-        title='UUID Version',
-        default=UUIDversions.four,
-        order=0)
+    binary = BoolProperty(
+        title='Binary Output',
+        default=False,
+        advanced=True)
     output = StringProperty(
         title='Output Attribute',
         default='uuid',
         advanced=True)
-    binary = BoolProperty(
-        title='Binary Output',
-        default=False,
+    uuid_name = ObjectProperty(
+        UUIDname,
+        title='Name Options (versions 3 and 5 only)',
+        order=1,
+        advanced = True)
+    uuid_version = SelectProperty(
+        UUIDversions,
+        title='UUID Version',
+        default=UUIDversions.v4,
+        order=0,
         advanced=True)
     version = VersionProperty('0.1.0')
 
@@ -63,8 +72,8 @@ class UUID(EnrichSignals, Block):
         version_string = 'uuid{}'.format(version)
         if version in [1, 4]:
             return getattr(uuid, version_string)()
-        name = self.name_string(signal)
-        namespace = self.name_space(signal).value
+        name = self.uuid_name().name_string(signal)
+        namespace = self.uuid_name().name_space(signal).value
         namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
         try:
             new_uuid = getattr(uuid, version_string)(namespace_uuid, name)
