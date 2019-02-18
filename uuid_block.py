@@ -2,8 +2,8 @@ from enum import Enum
 import uuid
 from nio import Block
 from nio.block.mixins import EnrichSignals 
-from nio.properties import BoolProperty, ObjectProperty, PropertyHolder, \
-    SelectProperty, StringProperty, VersionProperty
+from nio.properties import BoolProperty, ObjectProperty, Property, \
+    PropertyHolder, SelectProperty, StringProperty, VersionProperty
 
 
 class UUIDnamespace(Enum):
@@ -22,7 +22,7 @@ class UUIDversions(Enum):
 
 class UUIDname(PropertyHolder):
 
-    custom_name_space = StringProperty(
+    custom_name_space = Property(
         title='Custom Namespace',
         allow_none=True,
         order=2)
@@ -71,6 +71,18 @@ class UUID(EnrichSignals, Block):
         new_signal = {self.output(signal): new_uuid}
         return self.get_output_signal(new_signal, signal)
 
+    def _create_uuid(self, custom_name_space, version):
+        if isinstance(custom_name_space, str):
+            new_uuid = uuid.UUID(hex=custom_name_space, version=version)
+        elif isinstance(custom_name_space, bytes):
+            new_uuid = uuid.UUID(bytes=custom_name_space, version=version)
+        else:
+            custom_name_space_type = type(custom_name_space).__name__
+            msg = 'Unexpected type for Custom Namespace: {}'
+            self.logger.error(msg.format(custom_name_space_type))
+            return
+        return new_uuid
+
     def _get_uuid(self, signal):
         version = self.uuid_version(signal).value
         version_string = 'uuid{}'.format(version)
@@ -79,7 +91,11 @@ class UUID(EnrichSignals, Block):
         name = self.uuid_name().name_string(signal)
         custom_name_space = self.uuid_name().custom_name_space(signal)
         if custom_name_space:
-            namespace_uuid = uuid.UUID(custom_name_space, version=version)
+            if not isinstance(custom_name_space, uuid.UUID):
+                namespace_uuid = self._create_uuid(custom_name_space, version)
+                if not namespace_uuid:
+                    # failed, an error has been logged
+                    return
         else:
             namespace = self.uuid_name().name_space(signal).value
             namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))

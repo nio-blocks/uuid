@@ -5,6 +5,13 @@ from nio.testing.block_test_case import NIOBlockTestCase
 from ..uuid_block import UUID
 
 
+class MockedUUIDclass(uuid.UUID):
+
+    mocked = Mock(spec=uuid.UUID)
+
+    def __new__(cls, *args, **kwargs):
+        return cls.mocked(*args, **kwargs)
+
 class TestUUID(NIOBlockTestCase):
 
     @patch('uuid.uuid4')
@@ -156,12 +163,9 @@ class TestUUID(NIOBlockTestCase):
         blk.stop()
         self.assert_num_signals_notified(0)
 
-    @patch('uuid.UUID')
     @patch('uuid.uuid5')
-    def test_custom_namespace(self, mock_uuid5, mock_uuid_constructor):
+    def test_custom_namespace(self, mock_uuid5):
         """A custom namespace can be used."""
-        mock_uuid_obj = Mock()
-        mock_uuid_constructor.return_value = mock_uuid_obj
         blk = UUID()
         config = {
             'uuid_name': {
@@ -172,15 +176,21 @@ class TestUUID(NIOBlockTestCase):
         }
         self.configure_block(blk, config)
         blk.start()
-        blk.process_signals([
-            Signal({'custom_name_space': 'customString'}),
-        ])
+        with patch('uuid.UUID', new=MockedUUIDclass):
+            blk.process_signals([
+                Signal({'custom_name_space': 'uuidString'}),
+                Signal({'custom_name_space': b'uuidBytes'}),
+            ])
         blk.stop()
-        # testcase made a new UUID during configure_block(), ignore that call
-        call_count =  mock_uuid_constructor.call_count -1
-        call_args_list = mock_uuid_constructor.call_args_list[1:]
-        self.assertEqual(call_count, 1)
-        self.assertEqual(call_args_list[-1][0], ('customString',))
-        self.assertEqual(call_args_list[-1][1], {'version': 5})
-        mock_uuid5.assert_called_once_with(mock_uuid_obj, 'niolabs.com')
-        # todo: support uuid and bytes for custom namespace
+        self.assertDictEqual(
+            MockedUUIDclass.mocked.call_args_list[0][1],
+            {'hex': 'uuidString', 'version': 5})
+        self.assertDictEqual(
+            MockedUUIDclass.mocked.call_args_list[1][1],
+            {'bytes': b'uuidBytes', 'version': 5})
+        self.assertEqual(
+            mock_uuid5.call_args_list[0][0][0],
+            MockedUUIDclass.mocked.return_value)
+        self.assertEqual(
+            mock_uuid5.call_args_list[1][0][0],
+            MockedUUIDclass.mocked.return_value)
