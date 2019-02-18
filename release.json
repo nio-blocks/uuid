@@ -1,7 +1,7 @@
 {
   "nio/UUID": {
     "language": "Python",
-    "from_python": "uuid_bock.UUID",
-    "url": "git://github.com/tyoungNIO/uuid.git"
+    "from_python": "uuid_block.UUID",
+    "url": "git://github.com/nio-blocks/uuid.git"
   }
 }
