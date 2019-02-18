@@ -176,6 +176,7 @@ class TestUUID(NIOBlockTestCase):
             Signal({'custom_name_space': 'customString'}),
         ])
         blk.stop()
+        # testcase made a new UUID during configure_block(), ignore that call
         call_count =  mock_uuid_constructor.call_count -1
         call_args_list = mock_uuid_constructor.call_args_list[1:]
         self.assertEqual(call_count, 1)
