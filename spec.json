@@ -6,6 +6,6 @@
     ],
     "tags": "uuid guid unique random",
     "from_readme": "docs/uuid_block.md",
-    "from_python": "uuid.UUID"
+    "from_python": "uuid_block.UUID"
   }
 }
