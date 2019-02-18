@@ -22,15 +22,19 @@ class UUIDversions(Enum):
 
 class UUIDname(PropertyHolder):
 
-    name_string = StringProperty(
-        title='Name',
+    custom_name_space = StringProperty(
+        title='Custom Namespace',
         allow_none=True,
-        order=0)
+        order=2)
     name_space = SelectProperty(
         UUIDnamespace,
         title='Namespace',
         default=UUIDnamespace.DNS,
         order=1)
+    name_string = StringProperty(
+        title='Name',
+        allow_none=True,
+        order=0)
 
 class UUID(EnrichSignals, Block):
 
@@ -73,8 +77,12 @@ class UUID(EnrichSignals, Block):
         if version in [1, 4]:
             return getattr(uuid, version_string)()
         name = self.uuid_name().name_string(signal)
-        namespace = self.uuid_name().name_space(signal).value
-        namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
+        custom_name_space = self.uuid_name().custom_name_space(signal)
+        if custom_name_space:
+            namespace_uuid = uuid.UUID(custom_name_space, version=version)
+        else:
+            namespace = self.uuid_name().name_space(signal).value
+            namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
         try:
             new_uuid = getattr(uuid, version_string)(namespace_uuid, name)
         except TypeError as e:

@@ -155,3 +155,31 @@ class TestUUID(NIOBlockTestCase):
         blk.process_signals([Signal()])
         blk.stop()
         self.assert_num_signals_notified(0)
+
+    @patch('uuid.UUID')
+    @patch('uuid.uuid5')
+    def test_custom_namespace(self, mock_uuid5, mock_uuid_constructor):
+        """A custom namespace can be used."""
+        mock_uuid_obj = Mock()
+        mock_uuid_constructor.return_value = mock_uuid_obj
+        blk = UUID()
+        config = {
+            'uuid_name': {
+                'name_string': 'niolabs.com',
+                'custom_name_space': '{{ $custom_name_space }}',
+            },
+            'uuid_version': 5,
+        }
+        self.configure_block(blk, config)
+        blk.start()
+        blk.process_signals([
+            Signal({'custom_name_space': 'customString'}),
+        ])
+        blk.stop()
+        call_count =  mock_uuid_constructor.call_count -1
+        call_args_list = mock_uuid_constructor.call_args_list[1:]
+        self.assertEqual(call_count, 1)
+        self.assertEqual(call_args_list[-1][0], ('customString',))
+        self.assertEqual(call_args_list[-1][1], {'version': 5})
+        mock_uuid5.assert_called_once_with(mock_uuid_obj, 'niolabs.com')
+        # todo: support uuid and bytes for custom namespace
