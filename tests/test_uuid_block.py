@@ -135,3 +135,18 @@ class TestUUID(NIOBlockTestCase):
         self.assert_last_signal_notified(Signal({
             'uuid': b'foo',
         }))
+
+    def test_missing_name_option(self):
+        """When name is required and not given the exception is handled
+        and a helpful message is logged.
+        """
+        blk = UUID()
+        config = {
+            'name_string': None,
+            'uuid_version': 5,
+        }
+        self.configure_block(blk, config)
+        blk.start()
+        blk.process_signals([Signal()])
+        blk.stop()
+        self.assert_num_signals_notified(0)

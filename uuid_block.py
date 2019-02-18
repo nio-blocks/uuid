@@ -48,6 +48,9 @@ class UUID(EnrichSignals, Block):
 
     def process_signal(self, signal, input_id=None):
         new_uuid = self._get_uuid(signal)
+        if new_uuid is None:
+            # failed, an error has been logged
+            return
         if not self.binary():
             new_uuid = str(new_uuid)
         else:
@@ -63,4 +66,12 @@ class UUID(EnrichSignals, Block):
         name = self.name_string(signal)
         namespace = self.name_space(signal).value
         namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
-        return getattr(uuid, version_string)(namespace_uuid, name)
+        try:
+            new_uuid = getattr(uuid, version_string)(namespace_uuid, name)
+        except TypeError as e:
+            if name is None:
+                msg = '\"Name\" parameter is required for UUID version {}'
+                self.logger.error(msg.format(version))
+                return
+            raise e
+        return new_uuid
