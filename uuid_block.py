@@ -12,6 +12,7 @@ class UUIDnamespace(Enum):
     URL = 'URL'
     OID = 'OID'
     X500 = 'X500'
+    Custom = 'custom'
 
 class UUIDversions(Enum):
 
@@ -77,8 +78,14 @@ class UUID(EnrichSignals, Block):
         if version in [1, 4]:
             return getattr(uuid, version_string)()
         name = self.uuid_name().name_string(signal)
-        custom_name_space = self.uuid_name().custom_name_space(signal)
-        if custom_name_space:
+        namespace = self.uuid_name().name_space(signal).value
+        if namespace == 'custom':
+            custom_name_space = self.uuid_name().custom_name_space(signal)
+            if custom_name_space is None or not str(custom_name_space).strip():
+                # an emtpy string or None has been given
+                msg = '\"Custom Namespace\" parameter must be provided.'
+                self.logger.error(msg)
+                return
             if not isinstance(custom_name_space, uuid.UUID):
                 namespace_uuid = self._load_uuid(custom_name_space, version)
                 if not namespace_uuid:
@@ -87,7 +94,6 @@ class UUID(EnrichSignals, Block):
             else:
                 namespace_uuid = custom_name_space
         else:
-            namespace = self.uuid_name().name_space(signal).value
             namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
         try:
             new_uuid = getattr(uuid, version_string)(namespace_uuid, name)

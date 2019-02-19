@@ -180,6 +180,7 @@ class TestUUID(NIOBlockTestCase):
         blk = UUID()
         config = {
             'uuid_name': {
+                'name_space': 'custom',
                 'name_string': 'niolabs.com',
                 'custom_name_space': '{{ $custom_name_space }}',
             },
@@ -218,6 +219,7 @@ class TestUUID(NIOBlockTestCase):
         blk = UUID()
         config = {
             'uuid_name': {
+                'name_space': 'custom',
                 'name_string': 'niolabs.com',
                 'custom_name_space': dummy_uuid,
             },
@@ -231,3 +233,28 @@ class TestUUID(NIOBlockTestCase):
         self.assertEqual(
             mock_uuid5.call_args_list[0][0],
             (dummy_uuid, 'niolabs.com'))
+
+    @patch('uuid.uuid5')
+    def test_custom_namespace_without_value(self, mock_uuid5):
+        """When using a custom namespace empty strings and None types are
+        handled and logged.
+        """
+        blk = UUID()
+        config = {
+            'uuid_name': {
+                'name_space': 'Custom',
+                'name_string': 'niolabs.com',
+                'custom_name_space': '{{ $custom_name_space }}',
+            },
+            'uuid_version': 5,
+        }
+        self.configure_block(blk, config)
+        blk.start()
+        # both of these values should raise...
+        blk.process_signals([
+            Signal({'custom_name_space': None}),
+            Signal({'custom_name_space': ''}),
+        ])
+        blk.stop()
+        # but the block should catch and ignore those invalid values
+        mock_uuid5.assert_not_called()
