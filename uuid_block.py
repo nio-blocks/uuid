@@ -60,7 +60,7 @@ class UUID(EnrichSignals, Block):
     version = VersionProperty('0.1.0')
 
     def process_signal(self, signal, input_id=None):
-        new_uuid = self._get_uuid(signal)
+        new_uuid = self._get_new_uuid(signal)
         if new_uuid is None:
             # failed, an error has been logged
             return
@@ -71,19 +71,7 @@ class UUID(EnrichSignals, Block):
         new_signal = {self.output(signal): new_uuid}
         return self.get_output_signal(new_signal, signal)
 
-    def _create_uuid(self, custom_name_space, version):
-        if isinstance(custom_name_space, str):
-            new_uuid = uuid.UUID(hex=custom_name_space, version=version)
-        elif isinstance(custom_name_space, bytes):
-            new_uuid = uuid.UUID(bytes=custom_name_space, version=version)
-        else:
-            custom_name_space_type = type(custom_name_space).__name__
-            msg = 'Unexpected type for Custom Namespace: {}'
-            self.logger.error(msg.format(custom_name_space_type))
-            return
-        return new_uuid
-
-    def _get_uuid(self, signal):
+    def _get_new_uuid(self, signal):
         version = self.uuid_version(signal).value
         version_string = 'uuid{}'.format(version)
         if version in [1, 4]:
@@ -92,10 +80,12 @@ class UUID(EnrichSignals, Block):
         custom_name_space = self.uuid_name().custom_name_space(signal)
         if custom_name_space:
             if not isinstance(custom_name_space, uuid.UUID):
-                namespace_uuid = self._create_uuid(custom_name_space, version)
+                namespace_uuid = self._load_uuid(custom_name_space, version)
                 if not namespace_uuid:
                     # failed, an error has been logged
                     return
+            else:
+                namespace_uuid = custom_name_space
         else:
             namespace = self.uuid_name().name_space(signal).value
             namespace_uuid = getattr(uuid, 'NAMESPACE_{}'.format(namespace))
@@ -107,4 +97,16 @@ class UUID(EnrichSignals, Block):
                 self.logger.error(msg.format(version))
                 return
             raise e
+        return new_uuid
+
+    def _load_uuid(self, custom_name_space, version):
+        if isinstance(custom_name_space, str):
+            new_uuid = uuid.UUID(hex=custom_name_space, version=version)
+        elif isinstance(custom_name_space, bytes):
+            new_uuid = uuid.UUID(bytes=custom_name_space, version=version)
+        else:
+            custom_name_space_type = type(custom_name_space).__name__
+            msg = 'Unexpected type for Custom Namespace: {}'
+            self.logger.error(msg.format(custom_name_space_type))
+            return
         return new_uuid
