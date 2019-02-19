@@ -4,7 +4,7 @@ Generate Universally Unique ID codes according to RFC 4122.
 
 Properties
 ----------
-- **UUID Version**: (advanced) Select version of UUID to generate (use version `one` or `four` for random IDs).
+- **UUID Version**: (advanced) Select version of UUID to generate (use `v1` or `v4` for random IDs).
 - **Name Options**: (advanced)
   - **Name**: Only used in versions 3 and 5.
   - **Namespace**: Only used in versions 3 and 5.
