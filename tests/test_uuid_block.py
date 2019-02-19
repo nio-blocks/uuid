@@ -153,24 +153,17 @@ class TestUUID(NIOBlockTestCase):
         and a helpful message is logged.
         """
         blk = UUID()
+        # empty strings are valid for a name so we only test a None type
         config = {
             'name_string': None,
-            'uuid_version': 3,
+            'uuid_version': '{{ $uuid_version }}',
         }
         self.configure_block(blk, config)
         blk.start()
-        blk.process_signals([Signal()])
-        blk.stop()
-        self.assert_num_signals_notified(0)
-        # version 5
-        blk = UUID()
-        config = {
-            'name_string': None,
-            'uuid_version': 5,
-        }
-        self.configure_block(blk, config)
-        blk.start()
-        blk.process_signals([Signal()])
+        blk.process_signals([
+            Signal({'uuid_version': 3}),
+            Signal({'uuid_version': 5}),
+        ])
         blk.stop()
         self.assert_num_signals_notified(0)
 
@@ -236,8 +229,8 @@ class TestUUID(NIOBlockTestCase):
 
     @patch('uuid.uuid5')
     def test_custom_namespace_without_value(self, mock_uuid5):
-        """When using a custom namespace empty strings and None types are
-        handled and logged.
+        """When custom namespace is selected and not given the exception is
+        handled and a helpful message is logged.
         """
         blk = UUID()
         config = {
