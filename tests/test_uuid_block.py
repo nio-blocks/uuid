@@ -52,7 +52,6 @@ class TestUUID(NIOBlockTestCase):
             'uuid_name': {
                 'name_string': 'niolabs.com',
             },
-            'name_string': 'niolabs.com',
             'uuid_version': '{{ $uuid_version }}'
         }
         self.configure_block(blk, config)
@@ -235,7 +234,7 @@ class TestUUID(NIOBlockTestCase):
         blk = UUID()
         config = {
             'uuid_name': {
-                'name_space': 'Custom',
+                'name_space': 'custom',
                 'name_string': 'niolabs.com',
                 'custom_name_space': '{{ $custom_name_space }}',
             },
