@@ -1,5 +1,5 @@
 {
-  "nio/UUID4": {
+  "nio/UUID": {
     "description": "Create Universally Unique IDs",
     "categories": [
       "Signal Modifier"
