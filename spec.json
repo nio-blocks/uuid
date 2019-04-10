@@ -2,7 +2,8 @@
   "nio/UUID": {
     "description": "Create Universally Unique IDs",
     "categories": [
-      "Signal Modifier"
+      "Signal Modifier",
+			"Security"
     ],
     "tags": "uuid guid unique random",
     "from_readme": "docs/uuid_block.md",
